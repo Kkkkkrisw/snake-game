@@ -2,6 +2,7 @@
 #include<stdlib.h>
 #include<time.h>
 #include<conio.h>
+#include<windows.h>
 
 #define HEIGHT 20
 #define WIDTH 20
@@ -22,6 +23,8 @@ void initGame(void);
 void drawGame(void);
 void spawnFood(void);
 int isOnSnakebody(int x,int y);
+void readInput(void);
+void updateGame(void);
 
 int main(void)
 {
@@ -30,8 +33,13 @@ int main(void)
 	initGame();
 	drawGame();
 
-	printf("\nPress any key to exit...\n");
-	_getch();
+	while (running)
+	{
+		readInput();
+		updateGame();
+		drawGame();
+		Sleep(TICK_MS);
+	}
 
 	return 0;
 }
@@ -112,4 +120,61 @@ void drawGame(void)
 		}
 		printf("\n");
 	}
+}
+
+void readInput(void)
+{
+	if (!_kbhit())
+	{
+		return;
+	}
+
+	int key = _getch();
+
+	if (key == 0 || key == 224)
+	{
+		key = _getch();
+	}
+	else
+	{
+		return;
+	}
+
+	int indirx = 0;
+	int indiry = 0;
+
+	switch (key)
+	{
+	case 72: indirx = 0; indiry = -1; break;
+	case 80: indirx = 0; indiry = 1; break;
+	case 75: indirx = -1; indiry = 0; break;
+	case 77: indirx = 1; indiry = 0; break;
+	default: return;
+	}
+
+	if (indirx == -dirx && indiry == -diry)
+	{
+		return;
+	}
+
+	next_dirx = indirx;
+	next_diry = indiry;
+}
+
+void updateGame(void)
+{
+	dirx = next_dirx;
+	diry = next_diry;
+
+	int newHeadX = snakeX[0] + dirx;
+	int newHeadY = snakeY[0] + diry;
+
+	for (int i = length - 1; i > 0; i--)
+	{
+		snakeX[i] = snakeX[i - 1];
+		snakeY[i] = snakeY[i - 1];
+	}
+
+	snakeX[0] = newHeadX;
+	snakeY[0] = newHeadY;
 }
