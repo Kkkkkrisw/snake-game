@@ -22,7 +22,7 @@ int running;//是否进行游戏
 void initGame(void);
 void drawGame(void);
 void spawnFood(void);
-int isOnSnakebody(int x,int y);
+int isOnSnakebody(int x,int y,int test);
 void readInput(void);
 void updateGame(void);
 
@@ -40,6 +40,10 @@ int main(void)
 		drawGame();
 		Sleep(TICK_MS);
 	}
+
+	printf("Game Over! Final score:%d\n", score);
+	printf("Press any key to exit...\n");
+	_getch();
 
 	return 0;
 }
@@ -67,9 +71,9 @@ void initGame(void)
 	spawnFood();
 }
 
-int isOnSnakebody(int x, int y)
+int isOnSnakebody(int x, int y,int test)
 {
-	for (int i = 0; i < length; i++)
+	for (int i = 0; i < test; i++)
 	{
 		if (snakeX[i] == x && snakeY[i] == y)
 		{
@@ -85,7 +89,7 @@ void spawnFood(void)
 	{
 		foodX = rand() % (WIDTH - 2) + 1;
 		foodY = rand() % (HEIGHT - 2) + 1;
-	} while (isOnSnakebody(foodX, foodY));
+	} while (isOnSnakebody(foodX, foodY,length));
 }
 
 void drawGame(void)
@@ -105,7 +109,7 @@ void drawGame(void)
 			{
 				printf("O");
 			}
-			else if (isOnSnakebody(col, row))
+			else if (isOnSnakebody(col, row,length))
 			{
 				printf("o");
 			}
@@ -169,6 +173,37 @@ void updateGame(void)
 	int newHeadX = snakeX[0] + dirx;
 	int newHeadY = snakeY[0] + diry;
 
+	if (newHeadX <= 0 || newHeadX >= 19 || newHeadY <= 0 || newHeadY >= 19)
+	{
+		running = 0;
+		return;
+	}
+	
+	int ifeaten = 0;
+
+	if (newHeadX == foodX && newHeadY == foodY&& length<MAX_LEN )
+	{
+		ifeaten = 1;
+		if (isOnSnakebody(newHeadX, newHeadY,length))
+		{
+			running = 0;
+			return;
+		}
+	}
+	else
+	{
+		if (isOnSnakebody(newHeadX, newHeadY,length-1))
+		{
+			running = 0;
+			return;
+		}
+	}
+	if (ifeaten)
+	{
+		score++;
+		length++;
+	}
+
 	for (int i = length - 1; i > 0; i--)
 	{
 		snakeX[i] = snakeX[i - 1];
@@ -177,4 +212,9 @@ void updateGame(void)
 
 	snakeX[0] = newHeadX;
 	snakeY[0] = newHeadY;
+
+	if (ifeaten == 1)
+	{
+		spawnFood();
+	}
 }
