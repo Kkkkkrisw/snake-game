@@ -1,3 +1,4 @@
+#define _CRT_SECURE_NO_WARNINGS
 #include<stdio.h>
 #include<stdlib.h>
 #include<time.h>
@@ -18,6 +19,7 @@ int next_dirx,next_diry;//本帧请求的下一帧移动方向
 int foodX,foodY;//食物坐标
 int score;//分数
 int running;//是否进行游戏
+int highScore;//历史最高分
 
 void initGame(void);
 void drawGame(void);
@@ -25,11 +27,17 @@ void spawnFood(void);
 int isOnSnakebody(int x,int y,int test);
 void readInput(void);
 void updateGame(void);
+int currentDelay(int nowscore);
+void loadHighScore(void);
+void saveHighScore(void);
 
 int main(void)
 {
-	srand((unsigned)time(NULL));
+    int newRecord = 0;
 
+	srand((unsigned)time(NULL));
+	
+	loadHighScore();
 	initGame();
 	drawGame();
 
@@ -38,10 +46,21 @@ int main(void)
 		readInput();
 		updateGame();
 		drawGame();
-		Sleep(TICK_MS);
+		Sleep(currentDelay(score));
 	}
 
-	printf("Game Over! Final score:%d\n", score);
+	if (score > highScore)
+	{
+		highScore = score;
+		newRecord = 1;
+		saveHighScore();
+	}
+
+	printf("Game Over! Final score: %d    Best: %d\n", score,highScore);
+	if (newRecord)
+	{
+		printf("New High Score!\n");
+	}
 	printf("Press any key to exit...\n");
 	_getch();
 
@@ -95,7 +114,8 @@ void spawnFood(void)
 void drawGame(void)
 {
 	system("cls");
-	printf("Snake v0.1 Score: %d\n\n",score);
+
+	printf("Snake v0.2 Score: %d  Best: %d\n\n",score,highScore);
 
 	for (int row = 0; row < HEIGHT; row++)
 	{
@@ -198,6 +218,7 @@ void updateGame(void)
 			return;
 		}
 	}
+
 	if (ifeaten)
 	{
 		score++;
@@ -217,4 +238,54 @@ void updateGame(void)
 	{
 		spawnFood();
 	}
+}
+
+int currentDelay(int nowscore)
+{
+	int delay = TICK_MS - nowscore * 10;
+	if (delay >=60 )
+	{
+		return delay;
+	}
+	else
+	{
+		return 60;
+	}
+}
+
+void loadHighScore(void)
+{
+	FILE* fp;
+	int value=0;
+
+	highScore = 0;
+
+	fp = fopen("highscore.txt", "r");
+	if (fp == NULL)
+	{
+		return;
+	}
+
+	if (fscanf(fp, "%d", &value) == 1 && value >= 0)
+	{
+		highScore = value;
+	}
+
+	fclose(fp);
+}
+
+void saveHighScore(void)
+{
+	FILE* fp;
+
+	fp = fopen("highscore.txt", "w");
+	if (fp == NULL)
+	{
+		printf("Warning: cannot save high score.\n");
+		return;
+
+	}
+
+	fprintf(fp, "%d\n", highScore);
+	fclose(fp);
 }
