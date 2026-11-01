@@ -26,5 +26,8 @@ void updateGame(void);
 int currentDelay(int nowscore);
 void loadHighScore(void);
 void saveHighScore(void);
+void initConsole(void);
+void moveCursorToTop(void);
+void restoreConsole(void);
 
 #endif

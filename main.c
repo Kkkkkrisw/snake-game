@@ -13,7 +13,8 @@ int main(void)
 
 	loadHighScore();
 	initGame();
-	drawGame();
+	initConsole();
+	drawGame(); 
 
 	while (running)
 	{
@@ -30,6 +31,7 @@ int main(void)
 		saveHighScore();
 	}
 
+	restoreConsole();
 	printf("Game Over! Final score: %d    Best: %d\n", score, highScore);
 	if (newRecord)
 	{

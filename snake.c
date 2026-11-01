@@ -16,6 +16,8 @@ int foodX,foodY;//食物坐标
 int score;//分数
 int running;//是否进行游戏
 int highScore;//历史最高分
+static HANDLE hOut;
+static CONSOLE_CURSOR_INFO g_oldCursorInfo;
 
 
 void initGame(void)
@@ -64,9 +66,10 @@ void spawnFood(void)
 
 void drawGame(void)
 {
-	system("cls");
+	char frame[(WIDTH + 1) * HEIGHT + 128];
+	int n = 0;
 
-	printf("Snake v0.2 Score: %d  Best: %d\n\n",score,highScore);
+	n+=sprintf(frame+n,"Snake v0.3 Score: %d  Best: %d\n\n",score,highScore);
 
 	for (int row = 0; row < HEIGHT; row++)
 	{
@@ -74,27 +77,32 @@ void drawGame(void)
 		{
 			if (row == 0 || row ==HEIGHT - 1 || col == 0 || col == WIDTH  - 1)
 			{
-				printf("#");
+				frame[n++]='#';
 			}
 			else if (col== snakeX[0] && row == snakeY[0])
 			{
-				printf("O");
+				frame[n++] = 'O';
 			}
 			else if (isOnSnakebody(col, row,length))
 			{
-				printf("o");
+				frame[n++] = 'o';
 			}
 			else if (col== foodX && row== foodY)
 			{
-				printf("*");
+				frame[n++] = '*';
 			}
 			else
 			{
-				printf(" ");
+				frame[n++] = ' ';
 			}
 		}
-		printf("\n");
+		frame[n++] = '\n';
 	}
+	frame[n] = '\0';
+
+	moveCursorToTop();
+	fputs(frame, stdout);
+	fflush(stdout);
 }
 
 void readInput(void)
@@ -239,4 +247,30 @@ void saveHighScore(void)
 
 	fprintf(fp, "%d\n", highScore);
 	fclose(fp);
+}
+
+void initConsole(void)
+{
+	COORD pos = { 0,0 };
+	CONSOLE_CURSOR_INFO ci;
+
+	hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+
+	GetConsoleCursorInfo(hOut, &g_oldCursorInfo);
+	ci = g_oldCursorInfo;
+	ci.bVisible = FALSE;
+	SetConsoleCursorInfo(hOut, &ci);
+
+	SetConsoleCursorPosition(hOut, pos);
+}
+
+void moveCursorToTop(void)
+{
+	COORD pos = { 0,0 };
+	SetConsoleCursorPosition(hOut, pos);
+}
+
+void restoreConsole(void)
+{
+	SetConsoleCursorInfo(hOut,&g_oldCursorInfo);
 }
