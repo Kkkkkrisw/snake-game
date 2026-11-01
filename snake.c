@@ -4,12 +4,8 @@
 #include<time.h>
 #include<conio.h>
 #include<windows.h>
+#include"snake.h"
 
-#define HEIGHT 20
-#define WIDTH 20
-#define INIT_LEN 3
-#define MAX_LEN 400
-#define TICK_MS 150
 
 int snakeX[MAX_LEN];//蛇身坐标x
 int snakeY[MAX_LEN];//蛇身坐标y
@@ -21,51 +17,6 @@ int score;//分数
 int running;//是否进行游戏
 int highScore;//历史最高分
 
-void initGame(void);
-void drawGame(void);
-void spawnFood(void);
-int isOnSnakebody(int x,int y,int test);
-void readInput(void);
-void updateGame(void);
-int currentDelay(int nowscore);
-void loadHighScore(void);
-void saveHighScore(void);
-
-int main(void)
-{
-    int newRecord = 0;
-
-	srand((unsigned)time(NULL));
-	
-	loadHighScore();
-	initGame();
-	drawGame();
-
-	while (running)
-	{
-		readInput();
-		updateGame();
-		drawGame();
-		Sleep(currentDelay(score));
-	}
-
-	if (score > highScore)
-	{
-		highScore = score;
-		newRecord = 1;
-		saveHighScore();
-	}
-
-	printf("Game Over! Final score: %d    Best: %d\n", score,highScore);
-	if (newRecord)
-	{
-		printf("New High Score!\n");
-	}
-	printf("Press any key to exit...\n");
-	_getch();
-
-	return 0;
-}
 
 void initGame(void)
 {
